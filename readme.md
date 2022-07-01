@@ -193,3 +193,4 @@ python3 -m cProfile withoutcache.py mysql 1 100 3 > withoutcache.stats
   - trial_id がメモリになければ `storage.get_trial` を呼ぶ
 - `cached_storage.read_trials_from_remote_storage`
   - `storage._get_trials` を呼ぶ
+  - without cache より `read_trials_from_remote_storage` にかかる時間が長い。without cache のときは、`storage.read_trials_from_remote_storage` で何もしなくてよいが、with cache のときは、`cached_storage.read_trials_from_remote_storage` でキャッシュの更新を行わないといけないので遅い。
