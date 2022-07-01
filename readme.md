@@ -107,7 +107,7 @@ python3 -m cProfile withoutcache.py mysql 1 100 3 > withoutcache.stats
 
 ## With Cache
 
-```sh
+```
         1    0.000    0.000    0.136    0.136 _cached_storage.py:1(<module>)
         1    0.000    0.000    0.005    0.005 _cached_storage.py:115(get_study_id_from_name)
         1    0.000    0.000    0.007    0.007 _cached_storage.py:119(get_study_name_from_id)
@@ -132,4 +132,50 @@ python3 -m cProfile withoutcache.py mysql 1 100 3 > withoutcache.stats
         1    0.000    0.000    0.000    0.000 _cached_storage.py:51(__init__)
         1    0.000    0.000    0.026    0.026 _cached_storage.py:67(create_new_study)
         1    0.000    0.000    0.023    0.023 _cached_storage.py:90(set_study_directions)
+```
+
+```
+        1    0.000    0.000    0.134    0.134 storage.py:1(<module>)
+      400    0.000    0.000    0.000    0.000 storage.py:1027(<listcomp>)
+      100    0.003    0.000    0.600    0.006 storage.py:1031(_build_frozen_trial_from_trial_model)
+      100    0.000    0.000    0.000    0.000 storage.py:1035(<listcomp>)
+      100    0.001    0.000    0.009    0.000 storage.py:1050(<dictcomp>)
+      100    0.001    0.000    0.005    0.000 storage.py:1056(<dictcomp>)
+      100    0.000    0.000    0.000    0.000 storage.py:1060(<dictcomp>)
+      100    0.000    0.000    0.000    0.000 storage.py:1061(<dictcomp>)
+      100    0.000    0.000    0.000    0.000 storage.py:1064(<dictcomp>)
+        1    0.000    0.000    0.000    0.000 storage.py:1096(_set_default_engine_kwargs_for_mysql)
+        1    0.000    0.000    0.000    0.000 storage.py:1114(_fill_storage_url_template)
+      200    0.000    0.000    0.000    0.000 storage.py:1210(get_heartbeat_interval)
+        1    0.000    0.000    0.000    0.000 storage.py:1219(_VersionManager)
+        1    0.000    0.000    0.067    0.067 storage.py:1220(__init__)
+        1    0.000    0.000    0.023    0.023 storage.py:1233(_init_version_info_model)
+        1    0.000    0.000    0.044    0.044 storage.py:1246(_init_alembic)
+        1    0.000    0.000    0.028    0.028 storage.py:1271(check_table_schema_compatibility)
+        1    0.000    0.000    0.005    0.005 storage.py:1303(get_current_version)
+        1    0.000    0.000    0.022    0.022 storage.py:1311(get_head_version)
+        1    0.000    0.000    0.004    0.004 storage.py:1352(_create_alembic_script)
+        1    0.000    0.000    0.004    0.004 storage.py:1358(_create_alembic_config)
+        2    0.000    0.000    0.000    0.000 storage.py:1368(escape_alembic_config_value)
+        1    0.000    0.000    0.121    0.121 storage.py:185(__init__)
+        1    0.000    0.000    0.026    0.026 storage.py:255(create_new_study)
+        1    0.000    0.000    0.002    0.002 storage.py:285(_create_unique_study_name)
+        1    0.000    0.000    0.023    0.023 storage.py:298(set_study_directions)
+        1    0.000    0.000    0.000    0.000 storage.py:303(<listcomp>)
+        2    0.000    0.000    0.012    0.006 storage.py:355(get_study_id_from_name)
+        1    0.000    0.000    0.007    0.007 storage.py:363(get_study_name_from_id)
+      100    0.002    0.000    1.219    0.012 storage.py:549(_create_new_trial)
+      100    0.002    0.000    0.253    0.003 storage.py:608(_get_prepared_new_trial)
+     2014    0.005    0.000    4.479    0.002 storage.py:63(_create_scoped_session)
+      297    0.002    0.000    3.699    0.012 storage.py:705(set_trial_param)
+      297    0.004    0.000    1.378    0.005 storage.py:718(_set_trial_param_without_commit)
+        3    0.000    0.000    0.047    0.016 storage.py:752(_check_and_set_param_distribution)
+      100    0.002    0.000    1.283    0.013 storage.py:798(set_trial_state_values)
+      100    0.002    0.000    0.223    0.002 storage.py:825(_set_trial_value_without_commit)
+
+      100    0.001    0.000    0.852    0.009 storage.py:945(get_trial) <--- Here!
+
+        1    0.000    0.000    0.000    0.000 storage.py:96(RDBStorage)
+      400    0.026    0.000    2.083    0.005 storage.py:964(_get_trials)
+      400    0.002    0.000    0.002    0.000 storage.py:983(<genexpr>)
 ```
