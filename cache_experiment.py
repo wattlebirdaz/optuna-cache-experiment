@@ -2,6 +2,7 @@ import argparse
 from collections import defaultdict
 from datetime import datetime
 import math
+from optuna import storages
 from optuna.storages._rdb.storage import RDBStorage
 from optuna.storages._cached_storage import _CachedStorage
 
@@ -72,19 +73,24 @@ if __name__ == "__main__":
     sampler = optuna.samplers.TPESampler()
 
     for i in range(args.n_study):
-        study = optuna.create_study(sampler=sampler, storage=storage)
+        study = optuna.create_study(sampler=sampler, storage=cached_storage)
         study_id = study._study_id
-        with Profile("perf:optimize-study:without-cache:" + args.backend):
+        with Profile("perf:optimize-study-with-cache:" + args.backend):
             study.optimize(
                 build_objective_fun(args.n_param),
                 n_trials=args.n_trial,
                 gc_after_trial=False,
             )
 
+    def mock_get_storage(mock_storage):
+        return mock_storage
+
+    storages.get_storage = mock_get_storage
+
     for i in range(args.n_study):
-        study = optuna.create_study(sampler=sampler, storage=cached_storage)
+        study = optuna.create_study(sampler=sampler, storage=storage)
         study_id = study._study_id
-        with Profile("perf:optimize-study-with-cache:" + args.backend):
+        with Profile("perf:optimize-study:without-cache:" + args.backend):
             study.optimize(
                 build_objective_fun(args.n_param),
                 n_trials=args.n_trial,
