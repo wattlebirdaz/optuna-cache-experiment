@@ -179,3 +179,21 @@ python3 -m cProfile withoutcache.py mysql 1 100 3 > withoutcache.stats
       400    0.026    0.000    2.083    0.005 storage.py:964(_get_trials)
       400    0.002    0.000    0.002    0.000 storage.py:983(<genexpr>)
 ```
+
+## メモ
+
+### Without Cache のとき
+- `storage.get_all_trials`
+  - `storage._get_trials` を呼ぶ
+- `storage.get_trial`
+  - db から直接検索
+- `storage.read_trials_from_remote_storage`
+  - db から直接検索
+
+### With Cache のとき
+- `cached_storage.get_all_trials`
+  - study_id がメモリになければ `cached_storage.read_trials_from_remote_storage` を呼ぶ
+- `cached_storage.get_trial`
+  - trial_id がメモリになければ `storage.get_trial` を呼ぶ
+- `cached_storage.read_trials_from_remote_storage`
+  - `storage._get_trials` を呼ぶ
