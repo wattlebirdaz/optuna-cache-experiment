@@ -77,7 +77,7 @@ if __name__ == "__main__":
     for i in range(args.n_study):
         study = optuna.create_study(sampler=sampler, storage=storage)
         study_id = study._study_id
-        with Profile("perf:optimize-study:without-cache:" + args.backend):
+        with Profile("perf:optimize-study:new-cache:" + args.backend):
             study.optimize(
                 build_objective_fun(args.n_param),
                 n_trials=args.n_trial,
