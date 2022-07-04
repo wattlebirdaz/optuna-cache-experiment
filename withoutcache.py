@@ -4,7 +4,6 @@ from datetime import datetime
 import math
 from optuna import storages
 from optuna.storages._rdb.storage import RDBStorage
-from optuna.storages._cached_storage import _CachedStorage
 
 import optuna
 

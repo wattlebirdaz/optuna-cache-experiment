@@ -66,7 +66,7 @@ if __name__ == "__main__":
     sampler = optuna.samplers.TPESampler()
 
     def mock_get_storage(mock_storage):
-        return storage
+        return mock_storage
 
     storages.get_storage = mock_get_storage
 
