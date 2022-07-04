@@ -25,12 +25,15 @@ from optuna.trial import TrialState
 
 def log(func):
     return func
+
+
 # def log(func):
 #     def wrapper(*args, **kwargs):
 #         result = func(*args, **kwargs)
 #         print(func.__name__)
 #         return result
 #     return wrapper
+
 
 class _CachedStorage(BaseStorage, BaseHeartbeat):
     """A wrapper class of storage backends.
@@ -48,7 +51,8 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
     @log
     def __init__(self, backend: Union[RDBStorage, RedisStorage]) -> None:
         self._backend = backend
-        self.trials : Dict[int: FrozenTrial] = dict()
+        self.trials: Dict[int:FrozenTrial] = dict()
+        self.study_trial_ids: Dict[int : List[int]] = dict()
 
     @log
     def create_new_study(self, study_name: Optional[str] = None) -> int:
@@ -59,7 +63,9 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
         self._backend.delete_study(study_id)
 
     @log
-    def set_study_directions(self, study_id: int, directions: Sequence[StudyDirection]) -> None:
+    def set_study_directions(
+        self, study_id: int, directions: Sequence[StudyDirection]
+    ) -> None:
         self._backend.set_study_directions(study_id, directions)
 
     @log
@@ -99,13 +105,18 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
     @log
     def get_all_study_summaries(self, include_best_trial: bool) -> List[StudySummary]:
 
-        return self._backend.get_all_study_summaries(include_best_trial=include_best_trial)
+        return self._backend.get_all_study_summaries(
+            include_best_trial=include_best_trial
+        )
 
     @log
-    def create_new_trial(self, study_id: int, template_trial: Optional[FrozenTrial] = None) -> int:
+    def create_new_trial(
+        self, study_id: int, template_trial: Optional[FrozenTrial] = None
+    ) -> int:
         frozen_trial = self._backend._create_new_trial(study_id, template_trial)
         trial_id = frozen_trial._trial_id
         self.trials[trial_id] = frozen_trial
+        self.study_trial_ids.setdefault(study_id, []).append(trial_id)
         return trial_id
 
     @log
@@ -116,14 +127,22 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
         param_value_internal: float,
         distribution: distributions.BaseDistribution,
     ) -> None:
-        self._backend.set_trial_param(trial_id, param_name, param_value_internal, distribution)
-        self.trials[trial_id].params[param_name] = distribution.to_external_repr(param_value_internal)
+        self._backend.set_trial_param(
+            trial_id, param_name, param_value_internal, distribution
+        )
+        self.trials[trial_id].params[param_name] = distribution.to_external_repr(
+            param_value_internal
+        )
         self.trials[trial_id].distributions[param_name] = distribution
 
     @log
-    def get_trial_id_from_study_id_trial_number(self, study_id: int, trial_number: int) -> int:
+    def get_trial_id_from_study_id_trial_number(
+        self, study_id: int, trial_number: int
+    ) -> int:
 
-        return self._backend.get_trial_id_from_study_id_trial_number(study_id, trial_number)
+        return self._backend.get_trial_id_from_study_id_trial_number(
+            study_id, trial_number
+        )
 
     @log
     def get_best_trial(self, study_id: int) -> FrozenTrial:
@@ -150,19 +169,19 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
     @log
     def set_trial_user_attr(self, trial_id: int, key: str, value: Any) -> None:
 
-        #self._backend.set_trial_user_attr(trial_id, key=key, value=value)
+        # self._backend.set_trial_user_attr(trial_id, key=key, value=value)
         self.trials[trial_id].user_attrs[key] = value
 
     @log
     def set_trial_system_attr(self, trial_id: int, key: str, value: Any) -> None:
 
-        #self._backend.set_trial_system_attr(trial_id, key=key, value=value)
+        # self._backend.set_trial_system_attr(trial_id, key=key, value=value)
         self.trials[trial_id].system_attrs[key] = value
 
     @log
     def get_trial(self, trial_id: int) -> FrozenTrial:
         return self.trials[trial_id]
-        #return self._backend.get_trial(trial_id)
+        # return self._backend.get_trial(trial_id)
 
     @log
     def get_all_trials(
@@ -171,7 +190,13 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
         deepcopy: bool = True,
         states: Optional[Container[TrialState]] = None,
     ) -> List[FrozenTrial]:
-        return self._backend.get_all_trials(study_id, deepcopy, states)
+        trial_ids = self.study_trial_ids.setdefault(study_id, [])
+        res = []
+        for trial_id in trial_ids:
+            frozen_trial = self.trials[trial_id]
+            if frozen_trial.state in states:
+                res.append(copy.deepcopy(frozen_trial) if deepcopy else frozen_trial)
+        return res
 
     @log
     def read_trials_from_remote_storage(self, study_id: int) -> None:
@@ -182,7 +207,9 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
     def _check_trial_is_updatable(trial: FrozenTrial) -> None:
         if trial.state.is_finished():
             raise RuntimeError(
-                "Trial#{} has already finished and can not be updated.".format(trial.number)
+                "Trial#{} has already finished and can not be updated.".format(
+                    trial.number
+                )
             )
 
     @log
@@ -198,5 +225,7 @@ class _CachedStorage(BaseStorage, BaseHeartbeat):
         return self._backend.get_heartbeat_interval()
 
     @log
-    def get_failed_trial_callback(self) -> Optional[Callable[["optuna.Study", FrozenTrial], None]]:
+    def get_failed_trial_callback(
+        self,
+    ) -> Optional[Callable[["optuna.Study", FrozenTrial], None]]:
         return self._backend.get_failed_trial_callback()

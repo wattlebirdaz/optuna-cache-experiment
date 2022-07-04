@@ -55,11 +55,15 @@ if __name__ == "__main__":
     print(vars(args))
 
     if args.backend == "mysql":
-        storage = _CachedStorage(RDBStorage("mysql+mysqldb://optuna:password@127.0.0.1:3306/optuna"))
+        storage = _CachedStorage(
+            RDBStorage("mysql+mysqldb://optuna:password@127.0.0.1:3306/optuna")
+        )
     elif args.backend == "sqlite3":
         storage = _CachedStorage(RDBStorage("sqlite:///db.sqlite3withoutcache"))
     elif args.backend == "postgres":
-        storage = _CachedStorage(RDBStorage("postgresql+psycopg2://root:root@localhost:5432/optuna"))
+        storage = _CachedStorage(
+            RDBStorage("postgresql+psycopg2://root:root@localhost:5432/optuna")
+        )
     else:
         raise RuntimeError
 
